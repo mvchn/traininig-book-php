@@ -1,0 +1,21 @@
+{
+    "name": "mvchn/traininig-book-php",
+    "description": "Simple training program",
+    "type": "project",
+    "require": {
+        "symfony/console": "^6.1"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "mvchn",
+            "email": "movchan@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
