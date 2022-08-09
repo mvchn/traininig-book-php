@@ -4,6 +4,7 @@ namespace App\Model;
 
 class Book
 {
+    private $id;
     private $title;
     private $category;
     private $pagesCount;
@@ -15,6 +16,11 @@ class Book
         $this->category = $category;
         $this->pagesCount = $pagesCount;
         $this->currentPage = 0;
+    }
+
+    public function __toString(): string
+    {
+        return $this->title;
     }
 
     public function getTitle() : string

@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Exception\BookNotFoundException;
 use App\Repository\BookRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,24 +10,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class BookListCommand extends Command
+class BookRunCommand extends Command
 {
-    protected static $defaultName = 'app:book-list';
+    protected static $defaultName = 'app:book-run';
 
     private BookRepository $books;
 
     public function __construct(string $name = null, BookRepository $books)
     {
         parent::__construct($name);
+
         $this->books = $books;
     }
 
     protected function configure(): void
     {
         $this
-            // ...
-            ->addArgument('id', InputArgument::OPTIONAL, 'Book identifier?')
-            ->addArgument('action', InputArgument::OPTIONAL, 'Action name?')
+            ->addArgument('id', InputArgument::REQUIRED, 'Book identifier?')
         ;
     }
 
@@ -37,26 +37,12 @@ class BookListCommand extends Command
 
         $id = $input->getArgument('id');
 
-        if(!$id) {
-            $booksPresenter = [];
-            foreach ($this->books as $key => $user) {
-                $booksPresenter[] = sprintf('%d. %s', $key, $user->getTitle());
-            }
-
-            $io->listing($booksPresenter);
-
-            $id = $io->ask('Enter book id:', 0, function ($number) {
-                if (!is_numeric($number)) {
-                    throw new \RuntimeException('You must type a number.');
-                }
-
-                return (int) $number;
-            });
-        }
-
-        if(!$book = $this->books->get($id)) {
+        try {
+            $book = $this->books->get($id);
+        } catch (BookNotFoundException $e) {
             $io->error(sprintf('Book %d is not available', $id));
 
+            //TODO: log $e
             return Command::INVALID;
         }
 
@@ -66,6 +52,10 @@ class BookListCommand extends Command
             sprintf('%s', $book->getTitle()),
             sprintf('[ %s ]', $book->getCategory()),
         ]);
+
+        $action = $io->choice('Select action', ['run', 'edit', 'return']);
+
+        $io->writeln($action);
 
         return Command::SUCCESS;
 
